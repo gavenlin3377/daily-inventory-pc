@@ -1,0 +1,239 @@
+<!-- create.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新建盘点计划 - 国际零售工作台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- 引入 flatpickr 用于实现精准的日期置灰交互 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f5f7fa; font-size: 13px; }
+        .sidebar-item-active { background-color: #e6f7ff; color: #1890ff; border-right: 2px solid #1890ff; }
+        .required::before { content: '*'; color: #ff4d4f; margin-right: 4px; }
+        .form-label { width: 100px; text-align: right; margin-right: 12px; color: #555; shrink-0; }
+        .form-row { display: flex; align-items: flex-start; margin-bottom: 15px; }
+        .input-box { border: 1px solid #d9d9d9; border-radius: 2px; padding: 5px 10px; font-size: 12px; outline: none; transition: border 0.2s; background: white; width: 100%; }
+        .input-box:focus { border-color: #40a9ff; box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1); }
+        .input-box:disabled { background-color: #f5f5f5 !important; color: #aaa !important; cursor: not-allowed; border-color: #e8e8e8; }
+        .tip-text { font-size: 11px; color: #999; margin-top: 4px; line-height: 1.4; }
+        .hidden { display: none !important; }
+        /* 自定义 flatpickr 样式适配 AntD 风格 */
+        .flatpickr-calendar { box-shadow: 0 3px 6px -4px rgba(0,0,0,0.12), 0 6px 16px 0 rgba(0,0,0,0.08); border: none; }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden text-gray-700">
+
+    <header class="h-10 bg-white border-b flex items-center justify-between px-4 z-10 shrink-0">
+        <div class="flex items-center space-x-6">
+            <div class="flex items-center space-x-2">
+                <div class="w-5 h-5 bg-[#ff6700] rounded flex items-center justify-center"><span class="text-white text-[10px] font-bold">mi</span></div>
+                <span class="font-semibold text-gray-800 text-sm">国际零售工作台</span>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2 border-l pl-3 text-[11px]">
+            <span>林佳雯</span>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <main class="flex-1 overflow-y-auto p-4 flex flex-col bg-white">
+            <nav class="flex text-[11px] text-gray-400 mb-2 space-x-1 items-center">
+                <span>货品盘点</span> <i class="fas fa-chevron-right text-[8px] scale-75"></i>
+                <span>盘点计划管理</span> <i class="fas fa-chevron-right text-[8px] scale-75"></i>
+                <span id="breadcrumbTitle" class="text-gray-800">新建盘点计划</span>
+            </nav>
+            <h1 id="pageTitle" class="text-base font-medium text-gray-800 mb-6">新建盘点计划</h1>
+
+            <div class="flex-1 max-w-3xl space-y-8">
+                <!-- 任务基础信息 -->
+                <section>
+                    <h2 class="text-sm font-semibold text-gray-800 mb-4 pb-1 border-b">任务基础信息</h2>
+                    
+                    <div class="form-row"><label class="form-label">库存类型</label><span class="text-sm">良品</span></div>
+
+                    <div class="form-row">
+                        <label class="form-label required">计划名称</label>
+                        <div class="flex-1 relative">
+                            <input type="text" id="planName" placeholder="请输入计划名称" class="input-box pr-12">
+                            <span class="absolute right-2 top-1.5 text-[10px] text-gray-300">0 / 30</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label class="form-label required">计划类型</label>
+                        <select id="planType" class="w-48 input-box cursor-pointer" onchange="toggleFields()">
+                            <option value="">请选择计划类型</option>
+                            <option value="monthly">月度集中盘点</option>
+                            <option value="daily">日度盘点</option>
+                        </select>
+                    </div>
+
+                    <div id="monthContainer" class="form-row hidden">
+                        <label class="form-label required">盘点月份</label>
+                        <div class="w-48 relative">
+                            <input type="text" id="planMonth" placeholder="选择月份" class="input-box">
+                            <i class="far fa-calendar absolute right-2 top-2 text-gray-300 pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label class="form-label required">盘点品类</label>
+                        <div class="flex items-center space-x-6 text-sm py-1">
+                            <label class="flex items-center cursor-pointer"><input type="checkbox" checked class="mr-1.5">手机</label>
+                            <label class="flex items-center cursor-pointer"><input type="checkbox" checked class="mr-1.5">平板</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label class="form-label required">盘点开始日期</label>
+                        <div class="w-48 relative">
+                            <input type="text" id="startDate" placeholder="请选择开始日期" class="input-box">
+                            <i class="far fa-calendar absolute right-2 top-2 text-gray-300 pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label class="form-label required">盘点结束日期</label>
+                        <div class="flex-1">
+                            <div class="w-48 relative">
+                                <input type="text" id="endDate" placeholder="请选择结束日期" class="input-box">
+                                <i class="far fa-calendar absolute right-2 top-2 text-gray-300 pointer-events-none"></i>
+                            </div>
+                            <p class="tip-text">*说明：结束日期必须是开始日期的7天倍数（如3.4开始，可选3.10, 3.17）</p>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label class="form-label">备注</label>
+                        <textarea id="remark" placeholder="请输入摘要" class="input-box min-h-[60px]"></textarea>
+                    </div>
+                </section>
+
+                <!-- 设置盘点门店 -->
+                <section>
+                    <h2 class="text-sm font-semibold text-gray-800 mb-4 pb-1 border-b">设置盘点门店</h2>
+                    <div class="space-y-4">
+                        <div class="form-row">
+                            <label class="form-label required">执行对象</label>
+                            <div class="flex items-center space-x-6">
+                                <label class="flex items-center cursor-pointer"><input type="radio" name="target" checked class="mr-1.5">按门店类型</label>
+                                <label class="flex items-center cursor-pointer"><input type="radio" name="target" class="mr-1.5">指定门店</label>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label class="form-label required">门店类型</label>
+                            <div class="flex items-center space-x-6">
+                                <label class="flex items-center cursor-pointer"><input type="checkbox" checked class="mr-1.5">直营店</label>
+                                <label class="flex items-center cursor-pointer"><input type="checkbox" class="mr-1.5">授权店</label>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label class="form-label required">门店状态</label>
+                            <div class="flex flex-wrap gap-x-6 gap-y-2">
+                                <label class="flex items-center cursor-pointer"><input type="checkbox" checked class="mr-1.5">试营业</label>
+                                <label class="flex items-center cursor-pointer"><input type="checkbox" checked class="mr-1.5">营业中</label>
+                                <label class="flex items-center cursor-pointer"><input type="checkbox" class="mr-1.5">暂停营业</label>
+                                <label class="flex items-center cursor-pointer"><input type="checkbox" class="mr-1.5">闭店中</label>
+                                <label class="flex items-center cursor-pointer"><input type="checkbox" class="mr-1.5">已闭店</label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="mt-8 border-t pt-4 flex justify-center space-x-4 sticky bottom-0 bg-white pb-4">
+                <button id="submitBtn" onclick="submitForm()" class="bg-[#1890ff] text-white px-10 py-1.5 rounded text-xs hover:bg-blue-600">提交</button>
+                <a href="index.html" class="border px-10 py-1.5 rounded text-xs hover:bg-gray-50 text-gray-600">返回列表</a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 初始化 flatpickr 语言
+        flatpickr.localize(flatpickr.l10ns.zh);
+
+        // 1. 开始日期初始化 (T+1)
+        const startPicker = flatpickr("#startDate", {
+            minDate: new Date().fp_incr(1),
+            dateFormat: "Y-m-d",
+            onChange: function(selectedDates) {
+                if (selectedDates.length > 0) {
+                    endPicker.set('minDate', selectedDates[0]);
+                    endPicker.clear();
+                    endPicker.open(); // 自动打开结束日期选择
+                }
+            }
+        });
+
+        // 2. 结束日期初始化 (核心逻辑：置灰不合规日期)
+        const endPicker = flatpickr("#endDate", {
+            dateFormat: "Y-m-d",
+            clickOpens: false, // 设为 false，由我们手动控制打开逻辑，实现拦截提醒
+            disable: [
+                function(date) {
+                    const startStr = document.getElementById('startDate').value;
+                    if (!startStr) return true; // 未选开始日期前禁用所有
+                    
+                    const start = new Date(startStr);
+                    start.setHours(0,0,0,0);
+                    const current = new Date(date);
+                    current.setHours(0,0,0,0);
+
+                    const diffTime = current - start;
+                    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                    
+                    // 逻辑：必须是 7 的倍数 (7, 14, 21...) 且不能早于开始日期
+                    return diffDays <= 0 || diffDays % 7 !== 0;
+                }
+            ]
+        });
+
+        // 为结束日期添加点击拦截逻辑
+        document.getElementById('endDate').addEventListener('click', function() {
+            const planType = document.getElementById('planType').value;
+            const startDate = document.getElementById('startDate').value;
+
+            if (!planType) {
+                alert('请先选择计划类型');
+            } else if (!startDate) {
+                alert('请先填写盘点开始日期');
+            } else {
+                endPicker.open(); // 前置校验通过，才拉起日历
+            }
+        });
+
+        // 月份选择器
+        flatpickr("#planMonth", { dateFormat: "Y-m", plugins: [] });
+
+        // 查看模式处理
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('mode') === 'view') {
+            document.getElementById('pageTitle').innerText = '查看盘点计划';
+            document.getElementById('breadcrumbTitle').innerText = '查看盘点计划';
+            document.getElementById('submitBtn').classList.add('hidden');
+            document.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+            // 禁用 picker
+            [startPicker, endPicker].forEach(p => p.destroy());
+        }
+
+        function toggleFields() {
+            const type = document.getElementById('planType').value;
+            document.getElementById('monthContainer').classList.toggle('hidden', type !== 'monthly');
+        }
+
+        function submitForm() {
+            if (!document.getElementById('startDate').value || !document.getElementById('endDate').value) {
+                alert('请完善日期信息'); return;
+            }
+            alert('计划提交成功！');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
