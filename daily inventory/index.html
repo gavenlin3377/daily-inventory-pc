@@ -1,0 +1,190 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>盘点计划管理 - 国际零售工作台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f5f7fa; font-size: 13px; }
+        .sidebar-item-active { background-color: #e6f7ff; color: #1890ff; border-right: 2px solid #1890ff; }
+        .table-container::-webkit-scrollbar { height: 6px; }
+        .table-container::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+        table th, table td { white-space: nowrap; padding: 12px 15px !important; }
+        .sticky-col { position: sticky; right: 0; background: white; z-index: 5; box-shadow: -2px 0 5px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden text-gray-700">
+
+    <!-- Top Navigation -->
+    <header class="h-10 bg-white border-b flex items-center justify-between px-4 z-10 shrink-0">
+        <div class="flex items-center space-x-6">
+            <div class="flex items-center space-x-2">
+                <div class="w-5 h-5 bg-[#ff6700] rounded flex items-center justify-center"><span class="text-white text-[10px] font-bold">mi</span></div>
+                <span class="font-semibold text-gray-800 text-sm">国际零售工作台</span>
+            </div>
+            <nav class="hidden md:flex space-x-5 text-xs text-gray-500">
+                <a href="#" class="text-blue-600 border-b-2 border-blue-600 pb-2 mt-2">渠道运营_国际</a>
+                <a href="#" class="hover:text-blue-600 pb-2 mt-2">商品管理</a>
+                <a href="#" class="hover:text-blue-600 pb-2 mt-2">促销系统</a>
+                <a href="#" class="hover:text-blue-600 pb-2 mt-2">任务中心</a>
+            </nav>
+        </div>
+        <div class="flex items-center space-x-3 text-[11px] text-gray-500">
+            <span>林佳雯</span>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-40 bg-white border-r flex flex-col shrink-0 overflow-y-auto text-[12px]">
+            <div class="py-1">
+                <div class="px-3 py-2 flex items-center space-x-2 text-blue-600">
+                    <i class="fas fa-box w-3"></i><span class="font-medium">货物盘点</span>
+                </div>
+                <div class="pl-8 py-1.5 sidebar-item-active cursor-pointer">盘点计划管理</div>
+                <div class="pl-8 py-1.5 text-gray-500 hover:text-blue-600 cursor-pointer">盘点单管理</div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-3 flex flex-col bg-gray-50">
+            <div class="flex justify-between items-center mb-3">
+                <h1 class="text-base font-medium text-gray-800">盘点计划管理</h1>
+                <a href="create.html" class="bg-[#1890ff] text-white px-3 py-1 rounded text-xs hover:bg-blue-600">新建计划</a>
+            </div>
+
+            <div class="bg-white rounded shadow-sm flex flex-col overflow-hidden">
+                <!-- Search Area - Fully Restored -->
+                <div class="p-3 border-b flex flex-wrap gap-x-4 gap-y-3 items-center text-[12px]">
+                    <div class="flex items-center space-x-2">
+                        <label class="text-gray-500 shrink-0">计划名称</label>
+                        <input type="text" placeholder="请输入名称" class="border rounded px-2 py-1 w-32 outline-none">
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label class="text-gray-500 shrink-0">操作人</label>
+                        <input type="text" placeholder="请输入操作人" class="border rounded px-2 py-1 w-28 outline-none">
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label class="text-gray-500 shrink-0">计划日期</label>
+                        <div class="flex items-center border rounded px-2 py-1 bg-white">
+                            <input type="date" class="outline-none text-[11px]">
+                            <span class="mx-1 text-gray-300">至</span>
+                            <input type="date" class="outline-none text-[11px]">
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label class="text-gray-500 shrink-0">计划类型</label>
+                        <select id="typeFilter" onchange="filterTable()" class="border rounded px-2 py-1 w-36 outline-none cursor-pointer">
+                            <option value="all">全部</option>
+                            <option value="monthly">月度集中盘点</option>
+                            <option value="daily">日度盘点</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label class="text-gray-500 shrink-0">计划编号</label>
+                        <input type="text" placeholder="请输入编号" class="border rounded px-2 py-1 w-36 outline-none">
+                    </div>
+                    <div class="flex space-x-2 ml-auto">
+                        <button class="px-3 py-1 border rounded hover:bg-gray-50 text-gray-600" onclick="location.reload()">重置</button>
+                        <button class="px-3 py-1 bg-[#1890ff] text-white rounded hover:bg-blue-600" onclick="filterTable()">查询</button>
+                    </div>
+                </div>
+
+                <!-- Table Area - Fully Restored -->
+                <div class="flex-1 overflow-hidden flex flex-col">
+                    <div class="overflow-x-auto table-container">
+                        <table class="w-full text-left text-[12px]">
+                            <thead class="bg-gray-50 text-gray-500 border-b">
+                                <tr>
+                                    <th>计划编号</th>
+                                    <th>计划名称</th>
+                                    <th>计划类型</th>
+                                    <th>机构数量</th>
+                                    <th>已完成机构数</th>
+                                    <th>状态</th>
+                                    <th>开始日期</th>
+                                    <th>结束日期</th>
+                                    <th>创建人</th>
+                                    <th>创建时间</th>
+                                    <th class="sticky-col">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="planTableBody" class="divide-y text-gray-600">
+                                <tr data-type="daily">
+                                    <td class="text-blue-600">PDJH20260303001</td>
+                                    <td>今日手机库存抽盘计划</td>
+                                    <td><span class="bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded">日度盘点</span></td>
+                                    <td>12</td>
+                                    <td>5</td>
+                                    <td><span class="text-blue-500">盘点中</span></td>
+                                    <td>2026-03-03 09:00</td>
+                                    <td>2026-03-03 22:00</td>
+                                    <td>林佳雯</td>
+                                    <td>2026-03-03 08:30</td>
+                                    <td class="sticky-col space-x-2">
+                                        <button class="text-blue-500 hover:underline">编辑</button>
+                                        <a href="create.html?mode=view" class="text-blue-500 hover:underline">查看</a>
+                                        <button class="text-blue-500 hover:underline">盘点单</button>
+                                    </td>
+                                </tr>
+                                <tr data-type="monthly">
+                                    <td>PDJH20260205007</td>
+                                    <td>2月盘点计划-华南大区</td>
+                                    <td>月度集中盘点</td>
+                                    <td>3</td>
+                                    <td>3</td>
+                                    <td><span class="text-green-500">已完成</span></td>
+                                    <td>2026-02-05 13:51</td>
+                                    <td>2026-02-23 00:00</td>
+                                    <td>王惟一</td>
+                                    <td>2026-02-05 10:51</td>
+                                    <td class="sticky-col space-x-2">
+                                        <span class="text-gray-300">编辑</span>
+                                        <a href="create.html?mode=view" class="text-blue-500 hover:underline">查看</a>
+                                        <button class="text-blue-500 hover:underline">盘点单</button>
+                                    </td>
+                                </tr>
+                                <tr data-type="daily">
+                                    <td class="text-blue-600">PDJH20260301002</td>
+                                    <td>平板品类常规抽盘</td>
+                                    <td><span class="bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded">日度盘点</span></td>
+                                    <td>8</td>
+                                    <td>8</td>
+                                    <td><span class="text-green-500">已完成</span></td>
+                                    <td>2026-03-01 10:00</td>
+                                    <td>2026-03-01 18:00</td>
+                                    <td>林佳雯</td>
+                                    <td>2026-03-01 09:00</td>
+                                    <td class="sticky-col space-x-2">
+                                        <span class="text-gray-300">编辑</span>
+                                        <a href="create.html?mode=view" class="text-blue-500 hover:underline">查看</a>
+                                        <button class="text-blue-500 hover:underline">盘点单</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function filterTable() {
+            const val = document.getElementById('typeFilter').value;
+            const rows = document.querySelectorAll('#planTableBody tr');
+            rows.forEach(row => {
+                if (val === 'all' || row.getAttribute('data-type') === val) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
