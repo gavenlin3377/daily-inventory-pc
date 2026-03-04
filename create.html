@@ -23,26 +23,22 @@
         .tip-text { font-size: 11px; color: #999; margin-top: 4px; line-height: 1.4; }
         .hidden { display: none !important; }
         
-        /* 级联选择器自定义样式 */
         #categoryContainer { position: relative; width: 100%; max-width: 400px; }
-        .tag { background: #f5f5f5; border: 1px solid #e8e8e8; border-radius: 2px; padding: 0 6px; display: inline-flex; align-items: center; margin: 2px; font-size: 11px; height: 22px; color: #666; }
-        .tag-close { margin-left: 4px; cursor: pointer; color: #999; font-size: 10px; }
-        .tag-close:hover { color: #ff4d4f; }
+        .tag { background: #e6f7ff; border: 1px solid #91d5ff; border-radius: 2px; padding: 0 6px; display: inline-flex; align-items: center; margin: 2px; font-size: 11px; height: 22px; color: #1890ff; }
+        .tag-close { margin-left: 4px; cursor: pointer; color: #1890ff; font-size: 10px; }
         
         .cascader-menu { position: absolute; top: 100%; left: 0; width: 450px; height: 300px; background: white; border: 1px solid #d9d9d9; border-radius: 2px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; z-index: 100; margin-top: 4px; }
         .cascader-left { width: 180px; border-right: 1px solid #f0f0f0; overflow-y: auto; background: #fafafa; }
         .cascader-right { flex: 1; overflow-y: auto; padding: 4px 0; }
         
-        .menu-item { padding: 8px 12px; cursor: pointer; display: flex; align-items: center; transition: all 0.2s; font-size: 12px; }
+        .menu-item { padding: 8px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; font-size: 12px; }
         .menu-item:hover { background: #f5f5f5; }
-        .menu-item.active { background: #e6f7ff; color: #1890ff; font-weight: 500; }
+        .menu-item.active { background: #fff; color: #1890ff; }
         
         .custom-checkbox { width: 14px; height: 14px; border: 1px solid #d9d9d9; border-radius: 2px; position: relative; margin-right: 8px; flex-shrink: 0; background: white; transition: all 0.2s; }
         .custom-checkbox.checked { background: #1890ff; border-color: #1890ff; }
         .custom-checkbox.checked::after { content: ''; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: 2px solid white; border-top: 0; border-left: 0; transform: rotate(45deg); }
         .custom-checkbox.indeterminate::after { content: ''; position: absolute; left: 3px; top: 5px; width: 6px; height: 2px; background: #1890ff; }
-        
-        .flatpickr-calendar { box-shadow: 0 3px 6px -4px rgba(0,0,0,0.12), 0 6px 16px 0 rgba(0,0,0,0.08); border: none; }
     </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden text-gray-700">
@@ -54,9 +50,7 @@
                 <span class="font-semibold text-gray-800 text-sm">国际零售工作台</span>
             </div>
         </div>
-        <div class="flex items-center space-x-2 border-l pl-3">
-            <span class="text-[11px] text-gray-500">林佳雯</span>
-        </div>
+        <div class="flex items-center space-x-2 border-l pl-3"><span class="text-[11px]">林佳雯</span></div>
     </header>
 
     <div class="flex flex-1 overflow-hidden">
@@ -71,9 +65,7 @@
             <div class="flex-1 max-w-3xl space-y-8">
                 <section>
                     <h2 class="text-sm font-semibold text-gray-800 mb-4 pb-1 border-b">任务基础信息</h2>
-                    
                     <div class="form-row"><label class="form-label">库存类型</label><span class="text-sm">良品</span></div>
-
                     <div class="form-row">
                         <label class="form-label required">计划名称</label>
                         <div class="flex-1 relative">
@@ -81,7 +73,6 @@
                             <span class="absolute right-2 top-1.5 text-[10px] text-gray-300">0 / 30</span>
                         </div>
                     </div>
-
                     <div class="form-row">
                         <label class="form-label required">计划类型</label>
                         <select id="planType" class="w-48 input-box cursor-pointer" onchange="toggleFields()">
@@ -90,16 +81,12 @@
                             <option value="daily">日度盘点</option>
                         </select>
                     </div>
-
                     <div id="monthContainer" class="form-row hidden">
                         <label class="form-label required">盘点月份</label>
-                        <div class="w-48 relative">
-                            <input type="text" id="planMonth" placeholder="选择月份" class="input-box">
-                            <i class="far fa-calendar absolute right-2 top-2 text-gray-300 pointer-events-none"></i>
-                        </div>
+                        <input type="text" id="planMonth" placeholder="选择月份" class="w-48 input-box">
                     </div>
 
-                    <!-- 级联多选品类 -->
+                    <!-- 级联选择器 -->
                     <div class="form-row">
                         <label class="form-label required">盘点品类</label>
                         <div id="categoryContainer">
@@ -107,7 +94,6 @@
                                 <span class="text-gray-400" id="catPlaceholder">请选择盘点品类</span>
                             </div>
                             <i class="fas fa-chevron-down absolute right-3 top-2.5 text-gray-300 pointer-events-none"></i>
-                            
                             <div id="categoryMenu" class="cascader-menu hidden">
                                 <div class="cascader-left" id="primaryMenu"></div>
                                 <div class="cascader-right" id="secondaryMenu"></div>
@@ -117,23 +103,15 @@
 
                     <div class="form-row">
                         <label class="form-label required">盘点开始日期</label>
-                        <div class="w-48 relative">
-                            <input type="text" id="startDate" placeholder="请选择开始日期" class="input-box">
-                            <i class="far fa-calendar absolute right-2 top-2 text-gray-300 pointer-events-none"></i>
-                        </div>
+                        <input type="text" id="startDate" placeholder="请选择开始日期" class="w-48 input-box">
                     </div>
-
                     <div class="form-row">
                         <label class="form-label required">盘点结束日期</label>
                         <div class="flex-1">
-                            <div class="w-48 relative">
-                                <input type="text" id="endDate" placeholder="请选择结束日期" class="input-box">
-                                <i class="far fa-calendar absolute right-2 top-2 text-gray-300 pointer-events-none"></i>
-                            </div>
+                            <input type="text" id="endDate" placeholder="请选择结束日期" class="w-48 input-box">
                             <p class="tip-text">*说明：结束日期必须是开始日期的7天倍数</p>
                         </div>
                     </div>
-
                     <div class="form-row">
                         <label class="form-label">备注</label>
                         <textarea id="remark" placeholder="请输入摘要" class="input-box min-h-[60px]"></textarea>
@@ -172,50 +150,35 @@
             </div>
 
             <div class="mt-8 border-t pt-4 flex justify-center space-x-4 sticky bottom-0 bg-white pb-4">
-                <button id="submitBtn" onclick="submitForm()" class="bg-[#1890ff] text-white px-10 py-1.5 rounded text-xs hover:bg-blue-600 shadow-sm">提交</button>
+                <button id="submitBtn" onclick="submitForm()" class="bg-[#1890ff] text-white px-10 py-1.5 rounded text-xs hover:bg-blue-600">提交</button>
                 <a href="index.html" class="border px-10 py-1.5 rounded text-xs hover:bg-gray-50 text-gray-600">返回列表</a>
             </div>
         </main>
     </div>
 
     <script>
-        // 品类数据定义
         const categoryData = [
-            {
-                id: 'smartphone', name: 'Smart Phone',
-                children: ['Phone Accessories', 'POCO C Series', 'POCO F Series', 'POCO M Series', 'POCO X Series', 'REDMI A Series']
-            },
-            {
-                id: 'pad', name: 'Pad',
-                children: ['Pad Accessories', 'POCO Pad', 'REDMI Pad', 'Xiaomi Pad']
-            },
+            { id: 'smartphone', name: 'Smart Phone', children: ['Phone Accessories', 'POCO C Series', 'POCO F Series', 'POCO M Series', 'POCO X Series', 'REDMI A Series'] },
+            { id: 'pad', name: 'Pad', children: ['Pad Accessories', 'POCO Pad', 'REDMI Pad', 'Xiaomi Pad'] },
             { id: 'tv', name: 'TV', children: ['Xiaomi TV', 'Redmi TV'] },
             { id: 'eco', name: 'Eco Products', children: ['Audio', 'Wearable', 'Smart Home'] }
         ];
 
-        let selectedItems = {}; // 存储选中状态 { 'Pad': ['POCO Pad'], ... }
-        let currentPrimary = 'smartphone'; // 当前显示的左侧类目
+        let selectedItems = {};
+        let currentPrimary = 'smartphone';
+        categoryData.forEach(cat => selectedItems[cat.name] = []);
 
-        // 初始化为空
-        categoryData.forEach(cat => {
-            selectedItems[cat.name] = [];
-        });
-
-        // 初始化品类选择器
         function initCategoryPicker() {
             const input = document.getElementById('categoryInput');
             const menu = document.getElementById('categoryMenu');
-            
             input.addEventListener('click', (e) => {
                 e.stopPropagation();
                 menu.classList.toggle('hidden');
                 renderPrimary();
                 renderSecondary(currentPrimary);
             });
-
             document.addEventListener('click', () => menu.classList.add('hidden'));
             menu.addEventListener('click', (e) => e.stopPropagation());
-
             renderTags();
         }
 
@@ -225,23 +188,16 @@
             categoryData.forEach(cat => {
                 const item = document.createElement('div');
                 item.className = `menu-item ${cat.id === currentPrimary ? 'active' : ''}`;
-                
-                const isAll = selectedItems[cat.name].length === cat.children.length;
+                const isAll = selectedItems[cat.name].length === cat.children.length && cat.children.length > 0;
                 const isSome = selectedItems[cat.name].length > 0 && !isAll;
-                
                 item.innerHTML = `
-                    <div class="flex items-center">
-                        <div class="custom-checkbox ${isAll ? 'checked' : ''} ${isSome ? 'indeterminate' : ''}" 
-                             onclick="toggleAll('${cat.name}', event)"></div>
+                    <div class="flex items-center flex-1" onclick="togglePrimary('${cat.name}', event)">
+                        <div class="custom-checkbox ${isAll ? 'checked' : ''} ${isSome ? 'indeterminate' : ''}"></div>
                         <span>${cat.name}</span>
                     </div>
                     <i class="fas fa-chevron-right text-[10px] opacity-30"></i>
                 `;
-                item.onmouseenter = () => {
-                    currentPrimary = cat.id;
-                    renderPrimary();
-                    renderSecondary(cat.id);
-                };
+                item.onmouseenter = () => { currentPrimary = cat.id; renderPrimary(); renderSecondary(cat.id); };
                 container.appendChild(item);
             });
         }
@@ -250,92 +206,71 @@
             const cat = categoryData.find(c => c.id === catId);
             const container = document.getElementById('secondaryMenu');
             container.innerHTML = '';
-            
             cat.children.forEach(child => {
                 const isChecked = selectedItems[cat.name].includes(child);
                 const item = document.createElement('div');
                 item.className = 'menu-item';
-                item.innerHTML = `
-                    <div class="custom-checkbox ${isChecked ? 'checked' : ''}"></div>
-                    <span>${child}</span>
-                `;
+                item.innerHTML = `<div class="custom-checkbox ${isChecked ? 'checked' : ''}"></div><span>${child}</span>`;
                 item.onclick = () => toggleChild(cat.name, child);
                 container.appendChild(item);
             });
         }
 
-        function toggleAll(parentName, event) {
+        function togglePrimary(parentName, event) {
             event.stopPropagation();
             const cat = categoryData.find(c => c.name === parentName);
-            if (selectedItems[parentName].length === cat.children.length) {
-                selectedItems[parentName] = [];
-            } else {
-                selectedItems[parentName] = [...cat.children];
-            }
-            renderPrimary();
-            renderSecondary(currentPrimary);
-            renderTags();
+            selectedItems[parentName] = (selectedItems[parentName].length === cat.children.length) ? [] : [...cat.children];
+            renderPrimary(); renderSecondary(currentPrimary); renderTags();
         }
 
         function toggleChild(parentName, childName) {
-            const index = selectedItems[parentName].indexOf(childName);
-            if (index > -1) {
-                selectedItems[parentName].splice(index, 1);
-            } else {
-                selectedItems[parentName].push(childName);
-            }
-            renderPrimary();
-            renderSecondary(currentPrimary);
-            renderTags();
+            const idx = selectedItems[parentName].indexOf(childName);
+            if (idx > -1) selectedItems[parentName].splice(idx, 1);
+            else selectedItems[parentName].push(childName);
+            renderPrimary(); renderSecondary(currentPrimary); renderTags();
         }
 
         function renderTags() {
             const container = document.getElementById('categoryInput');
             const placeholder = document.getElementById('catPlaceholder');
-            const allSelected = [];
+            container.querySelectorAll('.tag, .more-count').forEach(t => t.remove());
             
-            Object.keys(selectedItems).forEach(parent => {
-                selectedItems[parent].forEach(child => {
-                    allSelected.push({parent, child});
-                });
+            let displayList = [];
+            categoryData.forEach(cat => {
+                if (selectedItems[cat.name].length === cat.children.length && cat.children.length > 0) {
+                    displayList.push({ label: `${cat.name} (全部)`, parent: cat.name, isAll: true });
+                } else {
+                    selectedItems[cat.name].forEach(c => displayList.push({ label: c, parent: cat.name, child: c }));
+                }
             });
 
-            // 清除旧标签
-            const oldTags = container.querySelectorAll('.tag');
-            oldTags.forEach(t => t.remove());
-
-            if (allSelected.length === 0) {
-                placeholder.classList.remove('hidden');
-            } else {
+            if (displayList.length === 0) placeholder.classList.remove('hidden');
+            else {
                 placeholder.classList.add('hidden');
-                allSelected.slice(0, 3).forEach(item => {
+                displayList.slice(0, 2).forEach(item => {
                     const tag = document.createElement('div');
                     tag.className = 'tag';
-                    tag.innerHTML = `${item.child} <i class="fas fa-times tag-close" onclick="removeTag('${item.parent}', '${item.child}', event)"></i>`;
+                    tag.innerHTML = `${item.label} <i class="fas fa-times tag-close" onclick="removeTag('${item.parent}', '${item.child || ''}', ${item.isAll || false}, event)"></i>`;
                     container.appendChild(tag);
                 });
-                if (allSelected.length > 3) {
+                if (displayList.length > 2) {
                     const more = document.createElement('span');
-                    more.className = 'text-[10px] text-blue-500 ml-1';
-                    more.innerText = `+${allSelected.length - 3}...`;
+                    more.className = 'more-count text-blue-500 text-[10px] ml-1';
+                    more.innerText = `+${displayList.length - 2}`;
                     container.appendChild(more);
                 }
             }
         }
 
-        function removeTag(parent, child, event) {
+        function removeTag(parent, child, isAll, event) {
             event.stopPropagation();
-            toggleChild(parent, child);
+            if (isAll) selectedItems[parent] = [];
+            else toggleChild(parent, child);
+            renderPrimary(); renderSecondary(currentPrimary); renderTags();
         }
 
-        // 初始化日期和页面逻辑
         flatpickr.localize(flatpickr.l10ns.zh);
-        const startPicker = flatpickr("#startDate", {
-            minDate: new Date().fp_incr(1),
-            dateFormat: "Y-m-d",
-            onChange: (d) => { if(d.length) endPicker.open(); }
-        });
-
+        const startPicker = flatpickr("#startDate", { minDate: new Date().fp_incr(1), dateFormat: "Y-m-d", onChange: () => endPicker.open() });
         const endPicker = flatpickr("#endDate", {
             dateFormat: "Y-m-d", clickOpens: false,
             disable: [ (date) => {
@@ -349,35 +284,18 @@
         });
 
         document.getElementById('endDate').addEventListener('click', () => {
-            const type = document.getElementById('planType').value;
-            const start = document.getElementById('startDate').value;
-            if (!type) alert('请先选择计划类型');
-            else if (!start) alert('请先填写盘点开始日期');
+            if (!document.getElementById('planType').value) alert('请先选择计划类型');
+            else if (!document.getElementById('startDate').value) alert('请先填写盘点开始日期');
             else endPicker.open();
         });
 
         flatpickr("#planMonth", { dateFormat: "Y-m" });
-
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('mode') === 'view') {
-            document.getElementById('pageTitle').innerText = '查看盘点计划';
-            document.getElementById('submitBtn').classList.add('hidden');
-            document.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
-            document.getElementById('categoryInput').style.pointerEvents = 'none';
-            document.getElementById('categoryInput').style.background = '#f5f5f5';
-        }
+        initCategoryPicker();
 
         function toggleFields() {
-            const type = document.getElementById('planType').value;
-            document.getElementById('monthContainer').classList.toggle('hidden', type !== 'monthly');
+            document.getElementById('monthContainer').classList.toggle('hidden', document.getElementById('planType').value !== 'monthly');
         }
-
-        function submitForm() {
-            alert('计划提交成功！');
-            window.location.href = 'index.html';
-        }
-
-        initCategoryPicker();
+        function submitForm() { alert('计划提交成功！'); window.location.href = 'index.html'; }
     </script>
 </body>
 </html>
