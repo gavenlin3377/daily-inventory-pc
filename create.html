@@ -33,7 +33,7 @@
         
         .menu-item { padding: 8px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; font-size: 12px; }
         .menu-item:hover { background: #f5f5f5; }
-        .menu-item.active { background: #fff; color: #1890ff; }
+        .menu-item.active { background: #fff !important; color: #1890ff; }
         
         .custom-checkbox { width: 14px; height: 14px; border: 1px solid #d9d9d9; border-radius: 2px; position: relative; margin-right: 8px; flex-shrink: 0; background: white; transition: all 0.2s; }
         .custom-checkbox.checked { background: #1890ff; border-color: #1890ff; }
@@ -86,7 +86,6 @@
                         <input type="text" id="planMonth" placeholder="选择月份" class="w-48 input-box">
                     </div>
 
-                    <!-- 级联选择器 -->
                     <div class="form-row">
                         <label class="form-label required">盘点品类</label>
                         <div id="categoryContainer">
@@ -150,7 +149,7 @@
             </div>
 
             <div class="mt-8 border-t pt-4 flex justify-center space-x-4 sticky bottom-0 bg-white pb-4">
-                <button id="submitBtn" onclick="submitForm()" class="bg-[#1890ff] text-white px-10 py-1.5 rounded text-xs hover:bg-blue-600">提交</button>
+                <button id="submitBtn" onclick="submitForm()" class="bg-[#1890ff] text-white px-10 py-1.5 rounded text-xs hover:bg-blue-600 shadow-sm">提交</button>
                 <a href="index.html" class="border px-10 py-1.5 rounded text-xs hover:bg-gray-50 text-gray-600">返回列表</a>
             </div>
         </main>
@@ -190,14 +189,29 @@
                 item.className = `menu-item ${cat.id === currentPrimary ? 'active' : ''}`;
                 const isAll = selectedItems[cat.name].length === cat.children.length && cat.children.length > 0;
                 const isSome = selectedItems[cat.name].length > 0 && !isAll;
+                
                 item.innerHTML = `
-                    <div class="flex items-center flex-1" onclick="togglePrimary('${cat.name}', event)">
+                    <div class="flex items-center flex-1 py-1">
                         <div class="custom-checkbox ${isAll ? 'checked' : ''} ${isSome ? 'indeterminate' : ''}"></div>
                         <span>${cat.name}</span>
                     </div>
                     <i class="fas fa-chevron-right text-[10px] opacity-30"></i>
                 `;
-                item.onmouseenter = () => { currentPrimary = cat.id; renderPrimary(); renderSecondary(cat.id); };
+
+                // 优化后的点击逻辑：确保勾选框和整行点击都有效
+                item.onclick = (e) => {
+                    togglePrimary(cat.name, e);
+                };
+
+                // 悬浮逻辑优化：仅在必要时刷新样式和右侧面板，不销毁自身 DOM
+                item.onmouseenter = () => {
+                    if (currentPrimary !== cat.id) {
+                        currentPrimary = cat.id;
+                        document.querySelectorAll('.cascader-left .menu-item').forEach(el => el.classList.remove('active'));
+                        item.classList.add('active');
+                        renderSecondary(cat.id);
+                    }
+                };
                 container.appendChild(item);
             });
         }
@@ -211,7 +225,10 @@
                 const item = document.createElement('div');
                 item.className = 'menu-item';
                 item.innerHTML = `<div class="custom-checkbox ${isChecked ? 'checked' : ''}"></div><span>${child}</span>`;
-                item.onclick = () => toggleChild(cat.name, child);
+                item.onclick = (e) => {
+                    e.stopPropagation();
+                    toggleChild(cat.name, child);
+                };
                 container.appendChild(item);
             });
         }
@@ -219,15 +236,20 @@
         function togglePrimary(parentName, event) {
             event.stopPropagation();
             const cat = categoryData.find(c => c.name === parentName);
-            selectedItems[parentName] = (selectedItems[parentName].length === cat.children.length) ? [] : [...cat.children];
-            renderPrimary(); renderSecondary(currentPrimary); renderTags();
+            const isAll = selectedItems[parentName].length === cat.children.length && cat.children.length > 0;
+            selectedItems[parentName] = isAll ? [] : [...cat.children];
+            renderPrimary();
+            renderSecondary(currentPrimary);
+            renderTags();
         }
 
         function toggleChild(parentName, childName) {
             const idx = selectedItems[parentName].indexOf(childName);
             if (idx > -1) selectedItems[parentName].splice(idx, 1);
             else selectedItems[parentName].push(childName);
-            renderPrimary(); renderSecondary(currentPrimary); renderTags();
+            renderPrimary();
+            renderSecondary(currentPrimary);
+            renderTags();
         }
 
         function renderTags() {
@@ -266,7 +288,6 @@
             event.stopPropagation();
             if (isAll) selectedItems[parent] = [];
             else toggleChild(parent, child);
-            renderPrimary(); renderSecondary(currentPrimary); renderTags();
         }
 
         flatpickr.localize(flatpickr.l10ns.zh);
