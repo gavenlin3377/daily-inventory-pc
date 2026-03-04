@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新建盘点计划 - 国际零售工作台</title>
+    <title>新建盘点计划 - 国际零售工作台 (已更新 v1.1.0)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -48,6 +48,7 @@
             <div class="flex items-center space-x-2">
                 <div class="w-5 h-5 bg-[#ff6700] rounded flex items-center justify-center"><span class="text-white text-[10px] font-bold">mi</span></div>
                 <span class="font-semibold text-gray-800 text-sm">国际零售工作台</span>
+                <span class="bg-green-100 text-green-600 px-1.5 py-0.5 rounded text-[10px] font-mono">v1.1.0</span>
             </div>
         </div>
         <div class="flex items-center space-x-2 border-l pl-3"><span class="text-[11px]">林佳雯</span></div>
@@ -158,9 +159,7 @@
     <script>
         const categoryData = [
             { id: 'smartphone', name: 'Smart Phone', children: ['Phone Accessories', 'POCO C Series', 'POCO F Series', 'POCO M Series', 'POCO X Series', 'REDMI A Series'] },
-            { id: 'pad', name: 'Pad', children: ['Pad Accessories', 'POCO Pad', 'REDMI Pad', 'Xiaomi Pad'] },
-            { id: 'tv', name: 'TV', children: ['Xiaomi TV', 'Redmi TV'] },
-            { id: 'eco', name: 'Eco Products', children: ['Audio', 'Wearable', 'Smart Home'] }
+            { id: 'pad', name: 'Pad', children: ['Pad Accessories', 'POCO Pad', 'REDMI Pad', 'Xiaomi Pad'] }
         ];
 
         let selectedItems = {};
@@ -191,19 +190,13 @@
                 const isSome = selectedItems[cat.name].length > 0 && !isAll;
                 
                 item.innerHTML = `
-                    <div class="flex items-center flex-1 py-1">
+                    <div class="flex items-center flex-1 py-1" onclick="togglePrimary('${cat.name}', event)">
                         <div class="custom-checkbox ${isAll ? 'checked' : ''} ${isSome ? 'indeterminate' : ''}"></div>
-                        <span>${cat.name}</span>
+                        <span class="ml-1">${cat.name}</span>
                     </div>
                     <i class="fas fa-chevron-right text-[10px] opacity-30"></i>
                 `;
 
-                // 优化后的点击逻辑：确保勾选框和整行点击都有效
-                item.onclick = (e) => {
-                    togglePrimary(cat.name, e);
-                };
-
-                // 悬浮逻辑优化：仅在必要时刷新样式和右侧面板，不销毁自身 DOM
                 item.onmouseenter = () => {
                     if (currentPrimary !== cat.id) {
                         currentPrimary = cat.id;
@@ -224,7 +217,7 @@
                 const isChecked = selectedItems[cat.name].includes(child);
                 const item = document.createElement('div');
                 item.className = 'menu-item';
-                item.innerHTML = `<div class="custom-checkbox ${isChecked ? 'checked' : ''}"></div><span>${child}</span>`;
+                item.innerHTML = `<div class="custom-checkbox ${isChecked ? 'checked' : ''}"></div><span class="ml-1">${child}</span>`;
                 item.onclick = (e) => {
                     e.stopPropagation();
                     toggleChild(cat.name, child);
