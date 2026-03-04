@@ -7,7 +7,6 @@
     <title>新建盘点计划 - 国际零售工作台</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- 引入 flatpickr 用于实现精准的日期置灰交互 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
@@ -23,7 +22,26 @@
         .input-box:disabled { background-color: #f5f5f5 !important; color: #aaa !important; cursor: not-allowed; border-color: #e8e8e8; }
         .tip-text { font-size: 11px; color: #999; margin-top: 4px; line-height: 1.4; }
         .hidden { display: none !important; }
-        /* 自定义 flatpickr 样式适配 AntD 风格 */
+        
+        /* 级联选择器自定义样式 */
+        #categoryContainer { position: relative; width: 100%; max-width: 400px; }
+        .tag { background: #f5f5f5; border: 1px solid #e8e8e8; border-radius: 2px; padding: 0 6px; display: inline-flex; align-items: center; margin: 2px; font-size: 11px; height: 22px; color: #666; }
+        .tag-close { margin-left: 4px; cursor: pointer; color: #999; font-size: 10px; }
+        .tag-close:hover { color: #ff4d4f; }
+        
+        .cascader-menu { position: absolute; top: 100%; left: 0; width: 450px; height: 300px; background: white; border: 1px solid #d9d9d9; border-radius: 2px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; z-index: 100; margin-top: 4px; }
+        .cascader-left { width: 180px; border-right: 1px solid #f0f0f0; overflow-y: auto; background: #fafafa; }
+        .cascader-right { flex: 1; overflow-y: auto; padding: 4px 0; }
+        
+        .menu-item { padding: 8px 12px; cursor: pointer; display: flex; align-items: center; transition: all 0.2s; font-size: 12px; }
+        .menu-item:hover { background: #f5f5f5; }
+        .menu-item.active { background: #e6f7ff; color: #1890ff; font-weight: 500; }
+        
+        .custom-checkbox { width: 14px; height: 14px; border: 1px solid #d9d9d9; border-radius: 2px; position: relative; margin-right: 8px; flex-shrink: 0; background: white; transition: all 0.2s; }
+        .custom-checkbox.checked { background: #1890ff; border-color: #1890ff; }
+        .custom-checkbox.checked::after { content: ''; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: 2px solid white; border-top: 0; border-left: 0; transform: rotate(45deg); }
+        .custom-checkbox.indeterminate::after { content: ''; position: absolute; left: 3px; top: 5px; width: 6px; height: 2px; background: #1890ff; }
+        
         .flatpickr-calendar { box-shadow: 0 3px 6px -4px rgba(0,0,0,0.12), 0 6px 16px 0 rgba(0,0,0,0.08); border: none; }
     </style>
 </head>
@@ -36,8 +54,8 @@
                 <span class="font-semibold text-gray-800 text-sm">国际零售工作台</span>
             </div>
         </div>
-        <div class="flex items-center space-x-2 border-l pl-3 text-[11px]">
-            <span>林佳雯</span>
+        <div class="flex items-center space-x-2 border-l pl-3">
+            <span class="text-[11px] text-gray-500">林佳雯</span>
         </div>
     </header>
 
@@ -51,7 +69,6 @@
             <h1 id="pageTitle" class="text-base font-medium text-gray-800 mb-6">新建盘点计划</h1>
 
             <div class="flex-1 max-w-3xl space-y-8">
-                <!-- 任务基础信息 -->
                 <section>
                     <h2 class="text-sm font-semibold text-gray-800 mb-4 pb-1 border-b">任务基础信息</h2>
                     
@@ -82,11 +99,19 @@
                         </div>
                     </div>
 
+                    <!-- 级联多选品类 -->
                     <div class="form-row">
                         <label class="form-label required">盘点品类</label>
-                        <div class="flex items-center space-x-6 text-sm py-1">
-                            <label class="flex items-center cursor-pointer"><input type="checkbox" checked class="mr-1.5">手机</label>
-                            <label class="flex items-center cursor-pointer"><input type="checkbox" checked class="mr-1.5">平板</label>
+                        <div id="categoryContainer">
+                            <div id="categoryInput" class="input-box min-h-[32px] flex flex-wrap items-center pr-8 cursor-pointer">
+                                <span class="text-gray-400" id="catPlaceholder">请选择盘点品类</span>
+                            </div>
+                            <i class="fas fa-chevron-down absolute right-3 top-2.5 text-gray-300 pointer-events-none"></i>
+                            
+                            <div id="categoryMenu" class="cascader-menu hidden">
+                                <div class="cascader-left" id="primaryMenu"></div>
+                                <div class="cascader-right" id="secondaryMenu"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -105,7 +130,7 @@
                                 <input type="text" id="endDate" placeholder="请选择结束日期" class="input-box">
                                 <i class="far fa-calendar absolute right-2 top-2 text-gray-300 pointer-events-none"></i>
                             </div>
-                            <p class="tip-text">*说明：结束日期必须是开始日期的7天倍数（如3.4开始，可选3.10, 3.17）</p>
+                            <p class="tip-text">*说明：结束日期必须是开始日期的7天倍数</p>
                         </div>
                     </div>
 
@@ -115,7 +140,6 @@
                     </div>
                 </section>
 
-                <!-- 设置盘点门店 -->
                 <section>
                     <h2 class="text-sm font-semibold text-gray-800 mb-4 pb-1 border-b">设置盘点门店</h2>
                     <div class="space-y-4">
@@ -148,78 +172,199 @@
             </div>
 
             <div class="mt-8 border-t pt-4 flex justify-center space-x-4 sticky bottom-0 bg-white pb-4">
-                <button id="submitBtn" onclick="submitForm()" class="bg-[#1890ff] text-white px-10 py-1.5 rounded text-xs hover:bg-blue-600">提交</button>
+                <button id="submitBtn" onclick="submitForm()" class="bg-[#1890ff] text-white px-10 py-1.5 rounded text-xs hover:bg-blue-600 shadow-sm">提交</button>
                 <a href="index.html" class="border px-10 py-1.5 rounded text-xs hover:bg-gray-50 text-gray-600">返回列表</a>
             </div>
         </main>
     </div>
 
     <script>
-        // 初始化 flatpickr 语言
-        flatpickr.localize(flatpickr.l10ns.zh);
+        // 品类数据定义
+        const categoryData = [
+            {
+                id: 'smartphone', name: 'Smart Phone',
+                children: ['Phone Accessories', 'POCO C Series', 'POCO F Series', 'POCO M Series', 'POCO X Series', 'REDMI A Series']
+            },
+            {
+                id: 'pad', name: 'Pad',
+                children: ['Pad Accessories', 'POCO Pad', 'REDMI Pad', 'Xiaomi Pad']
+            },
+            { id: 'tv', name: 'TV', children: ['Xiaomi TV', 'Redmi TV'] },
+            { id: 'eco', name: 'Eco Products', children: ['Audio', 'Wearable', 'Smart Home'] }
+        ];
 
-        // 1. 开始日期初始化 (T+1)
+        let selectedItems = {}; // 存储选中状态 { 'Pad': ['POCO Pad'], ... }
+        let currentPrimary = 'smartphone'; // 当前显示的左侧类目
+
+        // 初始化为空
+        categoryData.forEach(cat => {
+            selectedItems[cat.name] = [];
+        });
+
+        // 初始化品类选择器
+        function initCategoryPicker() {
+            const input = document.getElementById('categoryInput');
+            const menu = document.getElementById('categoryMenu');
+            
+            input.addEventListener('click', (e) => {
+                e.stopPropagation();
+                menu.classList.toggle('hidden');
+                renderPrimary();
+                renderSecondary(currentPrimary);
+            });
+
+            document.addEventListener('click', () => menu.classList.add('hidden'));
+            menu.addEventListener('click', (e) => e.stopPropagation());
+
+            renderTags();
+        }
+
+        function renderPrimary() {
+            const container = document.getElementById('primaryMenu');
+            container.innerHTML = '';
+            categoryData.forEach(cat => {
+                const item = document.createElement('div');
+                item.className = `menu-item ${cat.id === currentPrimary ? 'active' : ''}`;
+                
+                const isAll = selectedItems[cat.name].length === cat.children.length;
+                const isSome = selectedItems[cat.name].length > 0 && !isAll;
+                
+                item.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="custom-checkbox ${isAll ? 'checked' : ''} ${isSome ? 'indeterminate' : ''}" 
+                             onclick="toggleAll('${cat.name}', event)"></div>
+                        <span>${cat.name}</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-[10px] opacity-30"></i>
+                `;
+                item.onmouseenter = () => {
+                    currentPrimary = cat.id;
+                    renderPrimary();
+                    renderSecondary(cat.id);
+                };
+                container.appendChild(item);
+            });
+        }
+
+        function renderSecondary(catId) {
+            const cat = categoryData.find(c => c.id === catId);
+            const container = document.getElementById('secondaryMenu');
+            container.innerHTML = '';
+            
+            cat.children.forEach(child => {
+                const isChecked = selectedItems[cat.name].includes(child);
+                const item = document.createElement('div');
+                item.className = 'menu-item';
+                item.innerHTML = `
+                    <div class="custom-checkbox ${isChecked ? 'checked' : ''}"></div>
+                    <span>${child}</span>
+                `;
+                item.onclick = () => toggleChild(cat.name, child);
+                container.appendChild(item);
+            });
+        }
+
+        function toggleAll(parentName, event) {
+            event.stopPropagation();
+            const cat = categoryData.find(c => c.name === parentName);
+            if (selectedItems[parentName].length === cat.children.length) {
+                selectedItems[parentName] = [];
+            } else {
+                selectedItems[parentName] = [...cat.children];
+            }
+            renderPrimary();
+            renderSecondary(currentPrimary);
+            renderTags();
+        }
+
+        function toggleChild(parentName, childName) {
+            const index = selectedItems[parentName].indexOf(childName);
+            if (index > -1) {
+                selectedItems[parentName].splice(index, 1);
+            } else {
+                selectedItems[parentName].push(childName);
+            }
+            renderPrimary();
+            renderSecondary(currentPrimary);
+            renderTags();
+        }
+
+        function renderTags() {
+            const container = document.getElementById('categoryInput');
+            const placeholder = document.getElementById('catPlaceholder');
+            const allSelected = [];
+            
+            Object.keys(selectedItems).forEach(parent => {
+                selectedItems[parent].forEach(child => {
+                    allSelected.push({parent, child});
+                });
+            });
+
+            // 清除旧标签
+            const oldTags = container.querySelectorAll('.tag');
+            oldTags.forEach(t => t.remove());
+
+            if (allSelected.length === 0) {
+                placeholder.classList.remove('hidden');
+            } else {
+                placeholder.classList.add('hidden');
+                allSelected.slice(0, 3).forEach(item => {
+                    const tag = document.createElement('div');
+                    tag.className = 'tag';
+                    tag.innerHTML = `${item.child} <i class="fas fa-times tag-close" onclick="removeTag('${item.parent}', '${item.child}', event)"></i>`;
+                    container.appendChild(tag);
+                });
+                if (allSelected.length > 3) {
+                    const more = document.createElement('span');
+                    more.className = 'text-[10px] text-blue-500 ml-1';
+                    more.innerText = `+${allSelected.length - 3}...`;
+                    container.appendChild(more);
+                }
+            }
+        }
+
+        function removeTag(parent, child, event) {
+            event.stopPropagation();
+            toggleChild(parent, child);
+        }
+
+        // 初始化日期和页面逻辑
+        flatpickr.localize(flatpickr.l10ns.zh);
         const startPicker = flatpickr("#startDate", {
             minDate: new Date().fp_incr(1),
             dateFormat: "Y-m-d",
-            onChange: function(selectedDates) {
-                if (selectedDates.length > 0) {
-                    endPicker.set('minDate', selectedDates[0]);
-                    endPicker.clear();
-                    endPicker.open(); // 自动打开结束日期选择
-                }
-            }
+            onChange: (d) => { if(d.length) endPicker.open(); }
         });
 
-        // 2. 结束日期初始化 (核心逻辑：置灰不合规日期)
         const endPicker = flatpickr("#endDate", {
-            dateFormat: "Y-m-d",
-            clickOpens: false, // 设为 false，由我们手动控制打开逻辑，实现拦截提醒
-            disable: [
-                function(date) {
-                    const startStr = document.getElementById('startDate').value;
-                    if (!startStr) return true; // 未选开始日期前禁用所有
-                    
-                    const start = new Date(startStr);
-                    start.setHours(0,0,0,0);
-                    const current = new Date(date);
-                    current.setHours(0,0,0,0);
-
-                    const diffTime = current - start;
-                    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                    
-                    // 逻辑：必须是 7 的倍数 (7, 14, 21...) 且不能早于开始日期
-                    return diffDays <= 0 || diffDays % 7 !== 0;
-                }
-            ]
+            dateFormat: "Y-m-d", clickOpens: false,
+            disable: [ (date) => {
+                const startStr = document.getElementById('startDate').value;
+                if (!startStr) return true;
+                const start = new Date(startStr); start.setHours(0,0,0,0);
+                const current = new Date(date); current.setHours(0,0,0,0);
+                const diff = Math.round((current - start) / 86400000) + 1;
+                return diff <= 0 || diff % 7 !== 0;
+            }]
         });
 
-        // 为结束日期添加点击拦截逻辑
-        document.getElementById('endDate').addEventListener('click', function() {
-            const planType = document.getElementById('planType').value;
-            const startDate = document.getElementById('startDate').value;
-
-            if (!planType) {
-                alert('请先选择计划类型');
-            } else if (!startDate) {
-                alert('请先填写盘点开始日期');
-            } else {
-                endPicker.open(); // 前置校验通过，才拉起日历
-            }
+        document.getElementById('endDate').addEventListener('click', () => {
+            const type = document.getElementById('planType').value;
+            const start = document.getElementById('startDate').value;
+            if (!type) alert('请先选择计划类型');
+            else if (!start) alert('请先填写盘点开始日期');
+            else endPicker.open();
         });
 
-        // 月份选择器
-        flatpickr("#planMonth", { dateFormat: "Y-m", plugins: [] });
+        flatpickr("#planMonth", { dateFormat: "Y-m" });
 
-        // 查看模式处理
         const params = new URLSearchParams(window.location.search);
         if (params.get('mode') === 'view') {
             document.getElementById('pageTitle').innerText = '查看盘点计划';
-            document.getElementById('breadcrumbTitle').innerText = '查看盘点计划';
             document.getElementById('submitBtn').classList.add('hidden');
             document.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
-            // 禁用 picker
-            [startPicker, endPicker].forEach(p => p.destroy());
+            document.getElementById('categoryInput').style.pointerEvents = 'none';
+            document.getElementById('categoryInput').style.background = '#f5f5f5';
         }
 
         function toggleFields() {
@@ -228,12 +373,11 @@
         }
 
         function submitForm() {
-            if (!document.getElementById('startDate').value || !document.getElementById('endDate').value) {
-                alert('请完善日期信息'); return;
-            }
             alert('计划提交成功！');
             window.location.href = 'index.html';
         }
+
+        initCategoryPicker();
     </script>
 </body>
 </html>
